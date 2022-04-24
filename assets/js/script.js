@@ -36,6 +36,14 @@ var taskFormHandler = function(event) {
   // tasksToDoEl.appendChild(listItemEl);
 
 //new refactor data
+
+//check if input values are empty strings
+if (!taskNameInput || !taskTypeInput) {
+  formEl.reset();
+  alert("You need to fill out the task form!");
+  return false;
+}
+
   //package up data as an object
   var taskDataObj = {
     name: taskNameInput,
