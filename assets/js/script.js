@@ -14,6 +14,11 @@ var tasksToDoEl = document.querySelector("#tasks-to-do");
 //this variable os for the 'main' section to buble up the delete function to the whole item?
 var pageContentEl = document.querySelector("#page-content");
 
+//saves locally
+var saveTasks = function() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
 var completeEditTask = function(taskName, taskType, taskId) {
   // find the matching task list item
   var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
@@ -28,6 +33,8 @@ var completeEditTask = function(taskName, taskType, taskId) {
       tasks[i].name = taskName;
       tasks[i].type = taskType;
     }
+    //saves to local
+    saveTasks()
   };
 
   alert("Task Updated!");
@@ -112,12 +119,10 @@ var createTaskEl = function (taskDataObj) {
     taskDataObj.id = taskIdCounter;
     //push?? maybe adds another item to the array?
     tasks.push(taskDataObj);
-
+    //saves to local
+    saveTasks()
     //increase task counter for next unique id
     taskIdCounter++;
-
-    console.log(taskDataObj);
-    console.log(taskDataObj.status);
 }
 
 //creating dynamic buttons to dynamically added elements
@@ -226,6 +231,8 @@ var editTask = function(taskId) {
 var deleteTask = function(taskId) {
   var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
   taskSelected.remove();
+  //saves to local 
+  saveTasks()
 };
 
 //function to change subjects
@@ -255,7 +262,6 @@ var taskStatusChangeHandler = function(event) {
       tasks[i].status = statusValue;
     }
   }
-  console.log(tasks);
 
   // create new array to hold updated list of tasks
   var updatedTaskArr = [];
@@ -270,7 +276,11 @@ var taskStatusChangeHandler = function(event) {
 
   // reassign tasks array to be the same as updatedTaskArr
   tasks = updatedTaskArr;
+
+  //saves to local
+  saveTasks()
 };
+
 
 
 //when pagecontentEl is clicked, run taskbuttonhandler
