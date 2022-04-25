@@ -6,6 +6,8 @@ var taskIdCounter = 0
 // var buttonEl = document.querySelector("#save-task"); 
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do"); 
+//this variable os for the 'main' section to buble up the delete function to the whole item?
+var pageContentEl = document.querySelector("#page-content");
 
 var taskFormHandler = function(event) {
 
@@ -147,3 +149,53 @@ var createTaskActions = function(taskId) {
 //old event listener b/c its a form instead of a button
 // buttonEl.addEventListener("click", createTaskHandler);
 formEl.addEventListener("submit", taskFormHandler);
+
+//buttonhandler is listening to be called by an event. then it will call the block of code
+var taskButtonHandler = function(event) {
+
+  //get target element from event
+  var targetEl = event.target;
+
+  //if taget element was edit, taskId will equal the data attribute, task ID and run editTask
+  if (targetEl.matches(".edit-btn")) {
+    var taskId = targetEl.getAttribute("data-task-id");
+    editTask(taskId);
+  }
+  //if the button selected is the delete button, grab the element's taskID and run deleteTask
+  else if (targetEl.matches(".delete-btn")) {
+    var taskId = event.target.getAttribute ("data-task-id");
+    deleteTask(taskId);
+  }
+};
+
+var editTask = function(taskId) {
+  console.log("Editing task #" + taskId);
+
+  //get task list item element
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  //assign this variable to the content in the task selected
+  var taskName = taskSelected.querySelector("h3.task-name").textContent;
+  var taskType = taskSelected.querySelector("span.task-type").textContent;
+
+  //unsure whats going on here
+  document.querySelector("input[name='task-name']").value = taskName;
+  document.querySelector("select[name='task-type']").value = taskType;
+  document.querySelector("#save-task").textContent = "Save Task";
+  formEl.setAttribute("data-task-id", taskId);
+};
+
+//functino deleteTask narrrows the search by looking for a .task-item that has 
+//data-task-id equal to the argument we've passed through the function
+//Also notice that there's no space between the .task-item and 
+//the [data-task-id] attribute, which means that both properties must be on 
+//the same element; a space would look for a element with the [data-task-id] 
+//attribute somewhere inside a .task-item element.
+var deleteTask = function(taskId) {
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+  taskSelected.remove();
+};
+
+
+//when pagecontentEl is clicked, run taskbuttonhandler
+pageContentEl.addEventListener("click", taskButtonHandler);
