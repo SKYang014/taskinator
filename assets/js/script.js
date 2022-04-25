@@ -1,13 +1,30 @@
 //unique id creator
 var taskIdCounter = 0
 
-
+//to identify boxes to move tasks
+var tasksInProgressEl = document.querySelector("#tasks-in-progress");
+var tasksCompletedEl = document.querySelector("#tasks-completed");
 
 // var buttonEl = document.querySelector("#save-task"); 
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do"); 
 //this variable os for the 'main' section to buble up the delete function to the whole item?
 var pageContentEl = document.querySelector("#page-content");
+
+var completeEditTask = function(taskName, taskType, taskId) {
+  // find the matching task list item
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  // set new values
+  taskSelected.querySelector("h3.task-name").textContent = taskName;
+  taskSelected.querySelector("span.task-type").textContent = taskType;
+
+  alert("Task Updated!");
+
+  //reset form
+  formEl.removeAttribute("data-task-id");
+  document.querySelector("#save-task").textContent = "Add Task";
+};
 
 var taskFormHandler = function(event) {
 
@@ -16,48 +33,39 @@ var taskFormHandler = function(event) {
   var taskTypeInput = document.querySelector("select[name='task-type']").value;
   // console.dir(taskNameInput);
 
-//code moved to new function for refactoring
-  // //create list item
-  // var listItemEl = document.createElement("li");
-  // listItemEl.className = "task-item";
-
-  // //Create div to hold task info and add to list item
-  // var taskInfoEl = document.createElement("div");
-
-  // //give it a class name
-  // taskInfoEl.className = "task-info";
-
-  // //add html content to div
-  // taskInfoEl.innerHTML = "<h3 class='task-name'>" + taskNameInput + "</h3><span class='task-type'>" + taskTypeInput + "</span>";
-
-  // listItemEl.appendChild(taskInfoEl);
-
-  // //add entire list item to list
-  // tasksToDoEl.appendChild(listItemEl);
-
-//this code created a task item without type, b4 refactor
-  // var listItemEl = document.createElement("li");
-  // listItemEl.className = "task-item";
-  // listItemEl.textContent = taskNameInput;;
-  // tasksToDoEl.appendChild(listItemEl);
-
-//new refactor data
-
 //check if input values are empty strings
-if (!taskNameInput || !taskTypeInput) {
-  formEl.reset();
-  alert("You need to fill out the task form!");
-  return false;
-}
-
-  //package up data as an object
-  var taskDataObj = {
-    name: taskNameInput,
-    type: taskTypeInput
+  if (!taskNameInput || !taskTypeInput) {
+    formEl.reset();
+    alert("You need to fill out the task form!");
+    return false;
   }
 
-  //set it as an argument to createTaskEl
-  createTaskEl(taskDataObj);
+//tells us if we are editing something or not
+  var isEdit = formEl.hasAttribute("data-task-id");
+  // console.log(isEdit);
+
+  //package up data as an object
+  // var taskDataObj = {
+  //   name: taskNameInput,
+  //   type: taskTypeInput
+  // }
+
+  // //set it as an argument to createTaskEl
+  // createTaskEl(taskDataObj);
+  // has data attribute, so get task id and call function to complete edit process
+  if (isEdit) {
+    var taskId = formEl.getAttribute("data-task-id");
+    completeEditTask(taskNameInput, taskTypeInput, taskId);
+  } 
+  // no data attribute, so create object as normal and pass to createTaskEl function
+  else {
+    var taskDataObj = {
+      name: taskNameInput,
+      type: taskTypeInput
+    };
+
+    createTaskEl(taskDataObj);
+  }
 };
 
 var createTaskEl = function (taskDataObj) {
@@ -122,7 +130,7 @@ var createTaskActions = function(taskId) {
   statusSelectEl.setAttribute("data-task-id", taskId);
 
   //choices for the drop down to select the status of the task
-  var statusChoices = ["To Do", "In Progress", "Compelted"];
+  var statusChoices = ["To Do", "In Progress", "Completed"];
 
   //for loop will help with DRY to ensure we can run the code efficiently? 
   //i think it sets the status of the task, which should trigger it to move?
@@ -178,10 +186,14 @@ var editTask = function(taskId) {
   var taskName = taskSelected.querySelector("h3.task-name").textContent;
   var taskType = taskSelected.querySelector("span.task-type").textContent;
 
-  //unsure whats going on here
+  //selecting the input of the task-name ID from HTML to become the taskName, which prints from above code
   document.querySelector("input[name='task-name']").value = taskName;
   document.querySelector("select[name='task-type']").value = taskType;
+
+  //?? not used yet
   document.querySelector("#save-task").textContent = "Save Task";
+
+  //when edit task is clicked, we know which task id is selected
   formEl.setAttribute("data-task-id", taskId);
 };
 
@@ -196,6 +208,31 @@ var deleteTask = function(taskId) {
   taskSelected.remove();
 };
 
+//function to change subjects
+var taskStatusChangeHandler = function(event) {
+  // get the task item's id
+  var taskId = event.target.getAttribute("data-task-id");
+
+  // get the currently selected option's value and convert to lowercase
+  var statusValue = event.target.value.toLowerCase();
+
+  // find the parent task item element based on the id
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  if (statusValue === "to do") {
+    tasksToDoEl.appendChild(taskSelected);
+  } 
+  else if (statusValue === "in progress") {
+    tasksInProgressEl.appendChild(taskSelected);
+  } 
+  else if (statusValue === "completed") {
+    tasksCompletedEl.appendChild(taskSelected);
+  }
+};
+
 
 //when pagecontentEl is clicked, run taskbuttonhandler
 pageContentEl.addEventListener("click", taskButtonHandler);
+
+//when taskstatus on the page is changed, trigger event
+pageContentEl.addEventListener("change", taskStatusChangeHandler);
